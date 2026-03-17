@@ -76,3 +76,4 @@ This project needs Node.js support in cPanel because the OpenAI key stays on the
 
 This repo includes a top-level `app.js` file because Passenger looks for that filename by default on many cPanel Node.js setups.
 Leave `PORT` unset on cPanel unless your host explicitly tells you otherwise, because Passenger manages the application port there.
+If your host uses CloudLinux `Setup Node.js App` and `app.js` fails with an ESM startup error, use `app_wrapper.cjs` as the startup file instead.
