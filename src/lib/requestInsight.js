@@ -1,0 +1,28 @@
+import { normalizeInsight } from "../../shared/insightShape.js";
+
+export async function requestInsight(task) {
+  const response = await fetch("/api/insights", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      title: task.title,
+      details: task.details,
+    }),
+  });
+
+  const payload = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(payload?.error || "Could not generate an AI suggestion.");
+  }
+
+  const insight = normalizeInsight(payload?.insight);
+
+  if (!insight) {
+    throw new Error("The AI suggestion could not be validated. Please try again.");
+  }
+
+  return insight;
+}

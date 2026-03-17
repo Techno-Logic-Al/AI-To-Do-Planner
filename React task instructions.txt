@@ -1,0 +1,19 @@
+Goal: React to-do app to include AI insights.
+
+Tech Focus: React, API integration
+
+Challenge Details:
+
+Users can add items (tasks, scores, etc.).
+
+Add a “Suggest Improvement” button for each item:
+
+Sends the item description to ChatGPT.
+
+Receives suggestions such as optimised naming, coding tips, or even category grouping.
+
+Display AI suggestions inline with the item.
+
+Skills Practised: React components, props/state, handling API responses, updating UI dynamically.
+
+AI Integration: AI suggests improvements or alternative strategies for user input.
