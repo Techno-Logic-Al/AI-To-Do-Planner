@@ -14,7 +14,7 @@ export function TaskList({
           <h2>Active tasks</h2>
         </div>
         <p className="panel-copy">
-          Request an AI suggestion to help you plan each task in more detail.
+          Request an AI suggestion to help plan each task in more detail.
         </p>
       </div>
 
