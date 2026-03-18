@@ -37,6 +37,8 @@ A React to-do app with inline ChatGTP AI suggestions. Users can add tasks, reque
    - the React client on `http://localhost:5173`
    - the Express API on `http://localhost:3001`
 
+If you leave `VITE_API_BASE_URL` blank, the frontend uses the local Vite proxy for `/api`.
+
 ## Build for production
 
 ```bash
@@ -46,34 +48,44 @@ npm start
 
 After building, the Express server will serve the static React app from `dist/`.
 
-## Deploy on cPanel
+## Deploy with cPanel frontend + Cloud Run backend
 
-This project needs Node.js support in cPanel because the OpenAI key stays on the server and the Express app handles `/api/insights`.
+Use this route if your cPanel account can host only static files.
 
-1. Confirm your hosting plan includes cPanel `Application Manager` or `Node.js` support.
-2. Push this repo to GitHub.
-3. In cPanel, clone the repo into your home directory, not inside `public_html`.
-4. Create a `.env` file in the app directory and add:
+### 1. Deploy the backend to Cloud Run
 
-   ```env
-   OPENAI_API_KEY=your_key_here
-   OPENAI_MODEL=gpt-5-mini
-   ```
+The backend needs these environment variables in Cloud Run:
 
-5. Open cPanel `Application Manager` and register the app:
-   - Domain: your domain or subdomain
-   - Base URL: `/` or a subpath such as `/planner`
-   - Application Path: the repo directory relative to your home directory
-   - Environment: `Production`
-6. Install dependencies and build the app on the server:
+```env
+OPENAI_API_KEY=your_key_here
+OPENAI_MODEL=gpt-5-mini
+FRONTEND_ORIGIN=https://your-frontend-domain
+```
 
-   ```bash
-   npm install
-   npm run build
-   ```
+You can keep `min instances = 1` on Cloud Run for a more responsive demo.
 
-7. Start or redeploy the app from cPanel.
+### 2. Build the frontend for the live backend
 
-This repo includes a top-level `app.js` file because Passenger looks for that filename by default on many cPanel Node.js setups.
-Leave `PORT` unset on cPanel unless your host explicitly tells you otherwise, because Passenger manages the application port there.
-If your host uses CloudLinux `Setup Node.js App` and `app.js` fails with an ESM startup error, use `app_wrapper.cjs` as the startup file instead.
+Create `.env.production.local` with:
+
+```env
+VITE_API_BASE_URL=https://your-cloud-run-url
+```
+
+Then run:
+
+```bash
+npm run build
+```
+
+### 3. Upload only the built frontend to cPanel
+
+Upload the contents of `dist/` to your subdomain document root so that `index.html` sits directly in that folder.
+
+Do not upload:
+
+- `node_modules/`
+- `server/`
+- `shared/`
+- `.env`
+- the rest of the source tree

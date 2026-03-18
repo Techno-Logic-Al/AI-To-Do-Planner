@@ -15,8 +15,10 @@ const __dirname = path.dirname(__filename);
 const distPath = path.resolve(__dirname, "../dist");
 
 const app = express();
+const host = process.env.HOST || "0.0.0.0";
 const port = Number(process.env.PORT) || 3001;
 const model = process.env.OPENAI_MODEL || "gpt-5-mini";
+const allowedOrigins = createAllowedOrigins(process.env.FRONTEND_ORIGIN);
 
 const systemPrompt = [
   "You improve to-do items so they are easier to act on.",
@@ -57,7 +59,28 @@ const client = process.env.OPENAI_API_KEY
   ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
   : null;
 
+app.use((req, res, next) => {
+  const origin = req.get("Origin");
+
+  if (origin && allowedOrigins.has(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Vary", "Origin");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  }
+
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204);
+  }
+
+  return next();
+});
+
 app.use(express.json({ limit: "32kb" }));
+
+app.get("/health", (_req, res) => {
+  res.json({ ok: true });
+});
 
 app.post("/api/insights", async (req, res) => {
   const title = String(req.body?.title || "").trim();
@@ -128,9 +151,20 @@ if (existsSync(distPath)) {
   });
 }
 
-app.listen(port, () => {
-  console.log(`AI To-Do server listening on http://localhost:${port}`);
+app.listen(port, host, () => {
+  console.log(`AI To-Do server listening on http://${host}:${port}`);
 });
+
+function createAllowedOrigins(frontendOrigin) {
+  return new Set([
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    ...String(frontendOrigin || "")
+      .split(",")
+      .map((value) => value.trim())
+      .filter(Boolean),
+  ]);
+}
 
 async function generateInsight(taskSummary, extraInstructions = "") {
   const instructions = extraInstructions

@@ -1,7 +1,12 @@
 import { normalizeInsight } from "../../shared/insightShape.js";
 
+const apiBaseUrl = String(import.meta.env.VITE_API_BASE_URL || "")
+  .trim()
+  .replace(/\/+$/g, "");
+const insightsUrl = apiBaseUrl ? `${apiBaseUrl}/api/insights` : "/api/insights";
+
 export async function requestInsight(task) {
-  const response = await fetch("/api/insights", {
+  const response = await fetch(insightsUrl, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
